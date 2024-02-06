@@ -4,7 +4,6 @@ import numpy as np
 import torch
 import torchvision.transforms as T
 import wandb
-from fastprogress import progress_bar
 
 from cloud_diffusion.utils import ls
 
@@ -52,14 +51,13 @@ class CloudDataset:
     def load_data(self, files, num_frames, scale):
         "Loads all data into a single array self.data"
         data = []
-        for file in (pbar:=progress_bar(files, leave=False)):
+        for file in files:
             one_day = self.load_day(file, scale)
             wds = np.lib.stride_tricks.sliding_window_view(
                 one_day.squeeze(), 
                 num_frames, 
                 axis=0).transpose((0,3,1,2))
             data.append(wds)
-            pbar.comment = f"Creating CloudDataset from {file}"
         self.data = np.concatenate(data, axis=0)
 
     def shuffle(self):
